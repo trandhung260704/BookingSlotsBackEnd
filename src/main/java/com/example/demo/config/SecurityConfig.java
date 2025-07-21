@@ -50,7 +50,8 @@ public class SecurityConfig {
                                                 "/ws/**",
                                                 "/api/bookingslots/**",
                                                 "/api/booking/**",
-                                                "/api/pitches/**"
+                                                "/api/pitches/**",
+                                                "/api/timeslots/**"
                                         ).permitAll()
                                         .anyRequest().authenticated()
                         //authorizeHttpRequests

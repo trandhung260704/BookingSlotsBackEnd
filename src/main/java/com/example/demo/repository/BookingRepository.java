@@ -1,7 +1,9 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.Booking;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -18,4 +20,15 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
                                           @Param("date") LocalDate date,
                                           @Param("startTime") LocalTime startTime,
                                           @Param("endTime") LocalTime endTime);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT b FROM Booking b WHERE b.pitches.id_pitches = :idPitches AND b.date = :date " +
+            "AND (b.startTime < :endTime AND b.endTime > :startTime)")
+    List<Booking> findConflictingBookingsForUpdate(
+            @Param("idPitches") Integer idPitches,
+            @Param("date") LocalDate date,
+            @Param("startTime") LocalTime startTime,
+            @Param("endTime") LocalTime endTime
+    );
+
 }

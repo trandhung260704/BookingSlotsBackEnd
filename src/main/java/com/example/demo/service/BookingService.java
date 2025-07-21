@@ -39,7 +39,7 @@ public class BookingService {
         Pitches pitch = pitchesRepository.findById(request.getIdPitches())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sân"));
 
-        List<Booking> conflicts = bookingRepository.findConflictingBookings(
+        List<Booking> conflicts = bookingRepository.findConflictingBookingsForUpdate(
                 request.getIdPitches(), bookingDate, start, end
         );
 
@@ -69,6 +69,6 @@ public class BookingService {
 
         bookingSlotsRepository.save(bookingSlot);
 
-        return bookingRepository.save(booking);
+        return booking;
     }
 }
