@@ -51,7 +51,8 @@ public class SecurityConfig {
                                                 "/api/bookingslots/**",
                                                 "/api/booking/**",
                                                 "/api/pitches/**",
-                                                "/api/timeslots/**"
+                                                "/api/timeslots/**",
+                                                "/api/orders"
                                         ).permitAll()
                                         .anyRequest().authenticated()
                         //authorizeHttpRequests

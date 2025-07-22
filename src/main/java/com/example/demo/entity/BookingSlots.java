@@ -2,37 +2,39 @@ package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "bookingslots")
-@Data
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookingSlots {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_slot")
-    private Integer idSlot;
+    @Column(name = "id_booking", length = 100)
+    private String id_booking; // PK dạng: idpitches_date_starttime
 
     @ManyToOne
     @JoinColumn(name = "id_pitches")
-    private Pitches pitches;
+    private Pitches id_pitches;
 
+    @Column(name = "date", nullable = false)
     private LocalDate date;
-    private LocalTime startTime;
-    private LocalTime endTime;
+
+    @Column(name = "start_time", nullable = false)
+    private LocalTime start_time;
+
+    @Column(name = "end_time", nullable = false)
+    private LocalTime end_time;
 
     @ManyToOne
     @JoinColumn(name = "id_user")
-    private Users user;
+    private Users id_user;
 
-    @ManyToOne
-    @JoinColumn(name = "id_booking")
-    private Booking booking;
-
+    @Column(name = "status", length = 20)
     private String status;
 }
