@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dto.OrderDTO;
 import com.example.demo.entity.*;
+import com.example.demo.exception.TimeSlotAlreadyBookedException;
 import com.example.demo.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,26 +28,24 @@ public class OrderService {
         Users user = usersRepository.findById(request.getIdUser())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
-        Pitches pitch = pitchesRepository.findByIdForUpdate(request.getIdPitches())
+        Pitches pitch = pitchesRepository.findById(request.getIdPitches())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sân"));
 
         LocalDate orderDate = LocalDate.parse(request.getDate());
         LocalTime startTime = LocalTime.parse(request.getStartTime());
         LocalTime endTime = LocalTime.parse(request.getEndTime());
 
-        List<Orders> orderConflicts = orderRepository.findConflictingOrdersForUpdate(
-                pitch.getId_pitches(), orderDate, startTime, endTime
-        );
-
-        List<BookingSlots> conflictingBookings = bookingSlotsRepository.findConflictingBookingsForUpdate(
-                pitch.getId_pitches(), orderDate, startTime, endTime
-        );
-
-        if (!orderConflicts.isEmpty() || !conflictingBookings.isEmpty()) {
-            return null;
-        }
-
         String idBooking = pitch.getId_pitches() + "_" + orderDate + "_" + startTime;
+
+        bookingSlotsRepository.transactionLockByIdBooking(idBooking);
+
+        List<Orders> orderConflicts = orderRepository.findConflictingOrders(
+                pitch.getId_pitches(), orderDate, startTime, endTime
+        );
+
+        if (bookingSlotsRepository.existsById_booking(idBooking) || !orderConflicts.isEmpty()) {
+            throw new TimeSlotAlreadyBookedException("Khung giờ đã có người đặt, vui lòng chọn thời gian khác.");
+        }
 
         BookingSlots bookingSlot = new BookingSlots();
         bookingSlot.setId_booking(idBooking);

@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.OrderDTO;
 import com.example.demo.entity.Orders;
+import com.example.demo.exception.TimeSlotAlreadyBookedException;
 import com.example.demo.jwt.JwtUtil;
 import com.example.demo.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,6 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody OrderDTO orderDTO,
                                          @RequestHeader(value = "Authorization", required = false) String authHeader) {
-
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(401).body("Thiếu hoặc sai định dạng Authorization header");
         }
@@ -34,11 +34,13 @@ public class OrderController {
             return ResponseEntity.status(401).body("Token không hợp lệ hoặc đã hết hạn");
         }
 
-        Orders order = orderService.createOrder(orderDTO);
-        if (order == null) {
-            return ResponseEntity.status(409).body("Khung giờ đã được đặt. Vui lòng chọn khung khác.");
+        try {
+            Orders order = orderService.createOrder(orderDTO);
+            return ResponseEntity.ok(order);
+        } catch (TimeSlotAlreadyBookedException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Đã xảy ra lỗi khi tạo đơn đặt sân.");
         }
-
-        return ResponseEntity.ok(order);
     }
 }
